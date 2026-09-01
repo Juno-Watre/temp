@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <map>
 #include <iostream>
@@ -6,24 +8,24 @@
 
 class Lexer {
 public:
-	Lexer(std::string source) :sources(source) {};
-	void letex_analyzer();
+    Lexer(std::string source);
+    void letex_analyzer();
 
-	std::map<std::string, TokenType> keywords = {
-		{"if", TokenType::Keyword},
-		{"else", TokenType::Keyword},
-		{"while", TokenType::Keyword}
-	};
+    std::map<std::string, TokenType> keywords = {
+        {"if", TokenType::Keyword},
+        {"else", TokenType::Keyword},
+        {"while", TokenType::Keyword}
+    };
 
-	// ‘ÀÀ„∑˚”≥…‰±Ì
-	std::map<std::string, TokenType> operators = {
-		{"+", TokenType::Operator},
-		{"-", TokenType::Operator},
-		{"==", TokenType::Operator},
-		{"=", TokenType::Operator}
-	};
+    // operator map
+    std::map<std::string, TokenType> operators = {
+        {"+", TokenType::Operator},
+        {"-", TokenType::Operator},
+        {"==", TokenType::Operator},
+        {"=", TokenType::Operator}
+    };
 
-	std::vector<Token> tokens;
+    std::vector<Token> tokens;
 private:
-	std::string sources;
+    std::string sources;
 };

@@ -1,18 +1,18 @@
-const std::string file_path = "C:\\Users\\m1590\\Desktop\\Project1\\sources\\";
+#pragma once
 
-// read file from given path :
-// given path is const std::string file_path
 #include <iostream>
 #include <fstream>
-#include <filesystem> 
+#include <filesystem>
 #include <string>
 #include <vector>
+
+const std::string file_path = "C:\\Users\\m1590\\Desktop\\Project1\\sources\\";
 
 namespace fs = std::filesystem;
 
 class FileRead {
 public:
-    // 1. 读取指定路径文件的完整内容
+    // 1. read file content from given path
     static std::string get_file_content(std::string file_name) {
         file_name = file_path + file_name;
         std::ifstream in(file_name, std::ios::in | std::ios::binary);
@@ -23,7 +23,7 @@ public:
 
         std::string content;
         std::string line;
-        // 逐行读取并拼接到 content 中
+        // read line by line, append to content
         while (std::getline(in, line)) {
             content += line + "\n";
         }
@@ -32,12 +32,12 @@ public:
         return content;
     }
 
-    // 2. 获取指定目录下的所有文件路径列表
+    // 2. list all file paths in the target directory
     static std::vector<std::string> get_file_list() {
         std::string dir_path = file_path;
         std::vector<std::string> file_list;
 
-        // 使用 C++17 的 filesystem 遍历目录
+        // use C++17 filesystem to iterate directory
         try {
             for (const auto& entry : fs::directory_iterator(dir_path)) {
                 if (entry.is_regular_file()) {

@@ -1,254 +1,95 @@
+#pragma once
+
 #include <compiler/token.hpp>
 #include <vector>
 #include <fmt/format.h>
-/*
+
+
 struct Node
 {
-	Node* par;
-	std::vector<Node*> children;
-	Token data;
+    Node* par;
+    std::vector<Node*> children;
+    Token data;
 
-	Node& operator=(const Node& other) {
-		if (this == &other) {
-			return *this;
-		}
-
-		for (Node* child : children) {
-			delete child;
-		}
-		children.clear();
-
-
-		data = other.data;
-
-		for (Node* child : other.children) {
-			// ÎªÃ¿¸ö×Ó½Úµã·ÖÅäĞÂÄÚ´æ£¬²¢µİ¹éµ÷ÓÃ¿½±´¹¹Ôì»ò¸³Öµ
-			Node* newChild = new Node();
-			*newChild = *child; // µİ¹éµ÷ÓÃµ±Ç°µÄ operator=
-			children.push_back(newChild);
-		}
-
-
-		return *this;
-	}
+    Node& operator=(const Node& other);
 };
 
 
 template <>
 struct fmt::formatter<Node> : fmt::formatter<std::string> {
-
-	// ¸ñÊ½»¯º¯Êı
-	template <typename FormatContext>
-	auto format(const Node& node, FormatContext& ctx) const {
-		// ÕâÀïÎÒÃÇÖ±½Óµ÷ÓÃÒ»¸ö¸¨Öúº¯ÊıÀ´µİ¹é´òÓ¡Ê÷
-		return format_node(node, 0, ctx);
-	}
+    template <typename FormatContext>
+    auto format(const Node& node, FormatContext& ctx) const {
+        // delegate to recursive helper for indented output
+        return format_node(node, 0, ctx);
+    }
 
 private:
-	// ¸¨Öúµİ¹éº¯Êı£ºdepth ÓÃÓÚ¿ØÖÆËõ½ø
-	template <typename FormatContext>
-	auto format_node(const Node& node, int depth, FormatContext& ctx) const {
-		// 1. Êä³öËõ½øºÍµ±Ç°½ÚµãµÄÖµ
-		auto out = ctx.out();
-		out = fmt::format_to(out, "{:{}}{}\n", "", depth * 2, node.data.lexeme);
+    // recursive helper function, depth controls indentation
+    template <typename FormatContext>
+    auto format_node(const Node& node, int depth, FormatContext& ctx) const -> typename FormatContext::iterator {
+        // 1. print indentation and current node value
+        auto out = ctx.out();
+        out = fmt::format_to(out, "{:{}}{}\n", "", depth * 2, node.data.lexeme);
 
-		// 2. µİ¹é¸ñÊ½»¯ËùÓĞ×Ó½Úµã
-		for (const auto& child : node.children) {
-			if (child) {
-				out = format_node(*child, depth + 1, ctx);
-			}
-		}
-		return out;
-	}
+        // 2. recursively format child nodes
+        for (const auto& child : node.children) {
+            if (child) {
+                out = format_node(*child, depth + 1, ctx);
+            }
+        }
+        return out;
+    }
 };
 
 void
 display(Node* node)
 {
-	fmt::print("AST Tree£º{}", *node);
-}
-
-/*
-class AstGenerator {
-private:
-	std::vector<Token> tokens;
-	size_t pos;
-
-	// ¸¨Öú·½·¨£º»ñÈ¡µ±Ç° Token
-	Token current() const {
-		return (pos < tokens.size()) ? tokens[pos] : Token{ TokenType::EndOfFile, "" };
-	}
-
-	// ¸¨Öú·½·¨£ºÏûºÄµ±Ç° Token ²¢Ç°½ø
-	Token consume() {
-		Token tok = current();
-		if (pos < tokens.size()) ++pos;
-		return tok;
-	}
-
-	// ¸¨Öú·½·¨£ºÆ¥Åä²¢ÏûºÄÌØ¶¨ÀàĞÍµÄ Token
-	Token expect(TokenType type) {
-		if (current().type == type) return consume();
-		throw std::runtime_error("Syntax Error: Unexpected token at pos " + std::to_string(pos));
-	}
-
-	// µİ¹éÏÂ½µ¹æÔò£º½âÎö±í´ïÊ½£¨´¦Àí¼Ó¼õ·¨£¬µÍÓÅÏÈ¼¶£©
-	Node* parseExpression() {
-		Node* left = parseTerm();
-		while (current().lexeme == "-" || current().lexeme == "+") {
-			Node* opNode = new Node();
-			opNode->data = consume();
-			opNode->children.push_back(left);
-			opNode->children.push_back(parseTerm());
-			left = opNode;
-		}
-		return left;
-	}
-
-	// µİ¹éÏÂ½µ¹æÔò£º½âÎöÏî£¨´¦Àí³Ë³ı·¨£¬¸ßÓÅÏÈ¼¶£©
-	Node* parseTerm() {
-		Node* left = parseFactor();
-		while (current().lexeme == "*" || current().lexeme == "/") {
-			Node* opNode = new Node();
-			opNode->data = consume();
-			opNode->children.push_back(left);
-			opNode->children.push_back(parseFactor());
-			left = opNode;
-		}
-		return left;
-	}
-
-	// µİ¹éÏÂ½µ¹æÔò£º½âÎöÒò×Ó£¨´¦ÀíÊı×Ö¡¢±êÊ¶·û¡¢À¨ºÅ£©
-	Node* parseFactor() {
-		Token tok = current();
-		if (tok.type == TokenType::Integer || tok.type == TokenType::Identifier) {
-			consume();
-			Node* leaf = new Node();
-			leaf->data = tok;
-			return leaf;
-		}
-		else if (tok.lexeme == "(" || tok.lexeme == "{") {
-			consume();
-			Node* expr = parseExpression();
-			expect(TokenType::Bracket);  // TODO :
-			return expr;
-		}
-		throw std::runtime_error("Syntax Error: Expected number or '(' at pos " + std::to_string(pos));
-	}
-
-public:
-	// ¹¹Ôìº¯Êı
-	explicit AstGenerator(std::vector<Token> tokens_vec)
-		: tokens(std::move(tokens_vec)), pos(0) {
-	}
-
-	// Îö¹¹º¯Êı£ºµİ¹éÇåÀíÕû¿Ã AST Ê÷£¬·ÀÖ¹ÄÚ´æĞ¹Â©
-	~AstGenerator() = default;
-
-	// ¶ÔÍâ±©Â¶µÄÈë¿Úº¯Êı
-	Node* geneAstTree() {
-		if (tokens.empty()) return nullptr;
-		return parseExpression();
-	}
-
-	// µİ¹éÏú»Ù AST Ê÷µÄ¸¨Öú·½·¨
-	static void destroyTree(Node* node) {
-		if (!node) return;
-		for (Node* child : node->children) {
-			destroyTree(child);
-		}
-		delete node;
-	}
-};
-
-*/
-
-
-struct Node
-{
-	Node* par;
-	std::vector<Node*> children;
-	Token data;
-
-	Node& operator=(const Node& other);
-};
-
-
-template <>
-struct fmt::formatter<Node> : fmt::formatter<std::string> {
-	template <typename FormatContext>
-	auto format(const Node& node, FormatContext& ctx) const {
-		// ÕâÀïÎÒÃÇÖ±½Óµ÷ÓÃÒ»¸ö¸¨Öúº¯ÊıÀ´µİ¹é´òÓ¡Ê÷
-		return format_node(node, 0, ctx);
-	}
-
-private:
-	// ¸¨Öúµİ¹éº¯Êı£ºdepth ÓÃÓÚ¿ØÖÆËõ½ø
-	template <typename FormatContext>
-	auto format_node(const Node& node, int depth, FormatContext& ctx) const {
-		// 1. Êä³öËõ½øºÍµ±Ç°½ÚµãµÄÖµ
-		auto out = ctx.out();
-		out = fmt::format_to(out, "{:{}}{}\n", "", depth * 2, node.data.lexeme);
-
-		// 2. µİ¹é¸ñÊ½»¯ËùÓĞ×Ó½Úµã
-		for (const auto& child : node.children) {
-			if (child) {
-				out = format_node(*child, depth + 1, ctx);
-			}
-		}
-		return out;
-	}
-};
-
-void
-display(Node* node)
-{
-	fmt::print("AST Tree£º{}", *node);
+    fmt::print("AST Tree:{}", *node);
 }
 
 
 class AstGenerator {
 private:
-	std::vector<Token> tokens;
-	size_t pos;
+    std::vector<Token> tokens;
+    size_t pos;
 
 
-	Token current() const;
+    Token current() const;
 
-	// ¸¨Öú·½·¨£ºÏûºÄµ±Ç° Token ²¢Ç°½ø
-	Token consume();
+    // advance and return current Token
+    Token consume();
 
-	// ¸¨Öú·½·¨£ºÆ¥Åä²¢ÏûºÄÌØ¶¨ÀàĞÍµÄ Token
-	Token expect(TokenType type);
+    // match and consume a Token of the expected type
+    Token expect(TokenType type);
 
-	// µİ¹éÏÂ½µ¹æÔò£º½âÎö±í´ïÊ½£¨´¦Àí¼Ó¼õ·¨£¬µÍÓÅÏÈ¼¶£©
-	Node* parseExpression();
+    // recursive descent: parse expression (addition/subtraction, lowest precedence)
+    Node* parseExpression();
 
 
-	// µİ¹éÏÂ½µ¹æÔò£º½âÎöÏî£¨´¦Àí³Ë³ı·¨£¬¸ßÓÅÏÈ¼¶£©
-	Node* parseTerm();
+    // recursive descent: parse term (multiplication/division, higher precedence)
+    Node* parseTerm();
 
-	// µİ¹éÏÂ½µ¹æÔò£º½âÎöÒò×Ó£¨´¦ÀíÊı×Ö¡¢±êÊ¶·û¡¢À¨ºÅ£©
-	Node* parseFactor();
+    // recursive descent: parse factor (number, identifier, parentheses)
+    Node* parseFactor();
 
 public:
-	// ¹¹Ôìº¯Êı
-	explicit AstGenerator(std::vector<Token> tokens_vec)
-		: tokens(std::move(tokens_vec)), pos(0) {
-	}
+    // constructor
+    explicit AstGenerator(std::vector<Token> tokens_vec)
+        : tokens(std::move(tokens_vec)), pos(0) {
+    }
 
-	// Îö¹¹º¯Êı£ºµİ¹éÇåÀíÕû¿Ã AST Ê÷£¬·ÀÖ¹ÄÚ´æĞ¹Â©
-	~AstGenerator() = default;
+    // destructor â€” recursively builds AST; caller must prevent memory leaks
+    ~AstGenerator() = default;
 
-	// ¶ÔÍâ±©Â¶µÄÈë¿Úº¯Êı
-	Node* geneAstTree();
+    // public entry point
+    Node* geneAstTree();
 
-	// µİ¹éÏú»Ù AST Ê÷µÄ¸¨Öú·½·¨
-	static void destroyTree(Node* node) {
-		if (!node) return;
-		for (Node* child : node->children) {
-			destroyTree(child);
-		}
-		delete node;
-	}
+    // recursively destroy AST tree to free memory
+    static void destroyTree(Node* node) {
+        if (!node) return;
+        for (Node* child : node->children) {
+            destroyTree(child);
+        }
+        delete node;
+    }
 };

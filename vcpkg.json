@@ -1,8 +1,0 @@
-{
-  "name": "project1",
-  "version-string": "0.1.0",
-  "dependencies": [
-    "fmt"
-  ],
-  "builtin-baseline": "ae64f2bfb9e558a751014380e826710d9b4fd731"
-}
