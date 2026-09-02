@@ -2,7 +2,6 @@
 #include <compiler/token.hpp>
 #include <compiler/lexer.hpp>
 #include <vector>
-#include <fmt/format.h>
 #include <stdexcept>
 
 
@@ -59,10 +58,16 @@ Node* AstGenerator::parseFactor() {
         leaf->data = tok;
         return leaf;
     }
-    else if (tok.lexeme == "(" || tok.lexeme == "{") {
+    if (tok.type == TokenType::ParenOpen ) {
         consume();
         Node* expr = parseExpression();
-        expect(TokenType::Bracket);  // TODO : check matching bracket
+        expect(TokenType::ParenClose);  // TODO : check matching bracket
+        return expr;
+    }
+    if (tok.type == TokenType::BraceOpen ) {
+        consume();
+        Node* expr = parseExpression();
+        expect(TokenType::BraceOpen);  // TODO : check matching bracket
         return expr;
     }
     throw std::runtime_error("Syntax Error: Expected number or '(' at pos " + std::to_string(pos));

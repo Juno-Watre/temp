@@ -1,0 +1,247 @@
+编译原理课程设计 - AI代码生成参考摘要
+
+一、词法分析
+
+1.1 单词种类枚举
+enum token_kind {
+    ERROR_TOKEN, IDENT, INT_CONST, FLOAT_CONST, CHAR_CONST,
+    INT, FLOAT, CHAR,
+    IF, ELSE, ...  // 关键字
+    EQ, ASSIGN, ... // 运算符
+    LP, RP, ...    // 定界符
+    SEMI, COMMA, ...
+}
+
+1.2 全局变量
+- token_text[] — 单词自身值（标识符字符串、数字字符串等）
+- w — 当前单词种类编码
+- errors — 错误标记
+
+1.3 gettoken(fp) 函数逻辑
+gettoken(fp):
+    初始化 token_text 为空
+    while (c=fgetc(fp)) 是空白符;  // 跳过空白符，回车需单独处理（行数计数器+1）
+
+    if (c是字母) {
+        do { token_text += c } while ((c=fgetc(fp)) 是字母或数字);
+        ungetc(c, fp);
+        // 标识符可能是关键字，查表判定
+        // 关键字查找表：标识符与关键字相等 → 返回关键字编码；否则返回 IDENT
+    }
+
+    if (c是数字) {
+        do { token_text += c } while ((c=fgetc(fp)) 是数字);
+        ungetc(c, fp);
+        // token_text 中保存数字字符串，返回 INT_CONST
+    }
+
+    switch (c) {
+        case '=':
+            c = fgetc(fp);
+            if (c == '=') return EQ;  // 相等运算符
+            ungetc(c, fp);
+            return ASSIGN;  // 赋值运算符
+        // ... 其他运算符/定界符
+        default:
+            if (feof(fp)) return EOF;
+            else return ERROR_TOKEN;
+    }
+
+二、BNF 语法规则
+
+<程序>       ::= <外部定义序列>
+<外部定义序列> ::= <外部定义> <外部定义序列> | <外部定义>
+<外部定义>    ::= <外部变量定义> | <函数定义>
+<外部变量定义> ::= <类型说明符> <变量序列> ;
+<类型说明符>  ::= int | float | char
+<变量序列>    ::= <变量> , <变量序列> | <变量>
+<函数定义>    ::= <类型说明符> <函数名> ( <形式参数序列> ) <复合语句>
+<形式参数序列> ::= <形式参数> , <形式参数序列> | <空>
+<形式参数>    ::= <类型说明符> 标识符
+<复合语句>    ::= { <局部变量定义序列> <语句序列> }
+<局部变量定义序列> ::= <局部变量定义> <局部变量定义序列> | <空>
+<局部变量定义>  ::= <类型说明符> <变量序列> ;
+<语句序列>    ::= <语句> <语句序列> | <空>
+<语句>        ::= <表达式> ;
+              | return <表达式> ;
+              | if ( <表达式> ) <语句>
+              | if ( <表达式> ) <语句> else <语句>
+<表达式>     ::= <表达式> + <表达式>
+              | <表达式> - <表达式>
+              | <表达式> * <表达式>
+              | <表达式> / <表达式>
+              | INT_CONST | IDENT
+              | IDENT( <实参序列> )
+              | <表达式> == <表达式>
+              | <表达式> != <表达式>
+              | <表达式> > <表达式>
+              | <表达式> >= <表达式>
+              | <表达式> < <表达式>
+              | <表达式> <= <表达式>
+              | 标识符 = <表达式>
+<实参序列>    ::= <表达式> <实参序列> | <空>
+
+三、递归下降分析子程序
+
+每个语法单位对应一个子程序。调用时第一个单词已读入全局变量 w 中。
+
+3.1 program()
+program():
+    w = gettoken();
+    if (ExtDefList())  // 语法正确，返回AST根指针
+    else 报错
+
+3.2 ExtDefList()
+ExtDefList():
+    if (w == EOF) return NULL;
+    root = 生成外部定义序列结点;
+    ExtDef();          // 第一棵子树
+    ExtDefList();      // 第二棵子树
+    return root;
+
+3.3 ExtDef()
+ExtDef():
+    if (w 不是类型关键字) 报错返回 NULL;
+    保存类型说明符;
+    w = gettoken();
+    if (w != IDENT) 报错返回 NULL;
+    strcpy(tokenText0, tokenText);  // 保存变量名/函数名
+    w = gettoken();
+    if (w != LP) p = ExtVar();     // 外部变量定义
+    else p = FuncDef();             // 函数定义
+    return p;
+
+3.4 ExtVarDef()
+ExtVarDef():
+    root = 生成外部变量定义结点;
+    根据类型生成外部变量类型结点 → root第一个孩子;
+    p = 生成外部变量序列结点 → root第二个孩子;
+    由 tokenText0 的变量名生成变量结点 → p第一个孩子;
+    while (1):
+        if (w != ',' && w != ';') 报错;
+        if (w == ';') { w = gettoken(); return root; }
+        w = gettoken();
+        if (w 不是标识符) 报错;
+        q = 生成外部变量序列结点 → p第二个孩子; p = q;
+        由 tokenText 生成变量结点 → p第一个孩子;
+        w = gettoken();
+
+3.5 FuncDef()
+FuncDef():
+    root = 生成函数定义结点;
+    生成返回值类型结点 → root第一个孩子;
+    处理参数部分到反小括号，调用形参子程序 → root第二棵子树;
+    读入符号:
+        分号 → 函数原型声明（函数体为空）
+        正大括号 → 调用复合语句子程序 → root第三棵子树
+    return root;
+
+3.6 复合语句
+复合语句():
+    root = 生成复合语句结点;
+    w = gettoken();
+    if (w 是类型关键字) {
+        调用局部变量说明序列子程序 → root第一个孩子;
+    } else {
+        root第一个孩子 = NULL;
+    }
+    调用语句序列子程序 → root第二个孩子;
+    if (w != '}') 报错释放结点;
+    return root;
+
+3.7 语句序列
+语句序列():
+    root = NULL;
+    r1 = 调用处理一条语句子程序;
+    if (r1 == NULL) return NULL;  // 语句序列结束
+    root = 生成语句序列结点;
+    root->第1孩子 = r1;
+    root->第2孩子 = 递归调用语句序列();
+    return root;
+
+3.8 statement()
+statement():
+    switch (w):
+        case IF:
+            w = gettoken();
+            if (w != '(') 报错;
+            调用表达式子程序(结束符号为 ')') → 条件表达式子树;
+            调用语句子程序 → IF子句子树;
+            if (w == ELSE) {
+                调用语句子程序 → ELSE子句子树;
+                生成IF-ELSE结点(3棵子树: 条件, IF子句, ELSE子句);
+            } else {
+                生成IF结点(2棵子树: 条件, IF子句);
+            }
+        case '{': 调用复合语句子程序;
+        case WHILE: ...
+        case '(' 或 标识符 或 常数:
+            调用表达式子程序(结束符号为 ';');
+            w = gettoken();
+            返回表达式子树根指针;
+        case '}':
+            w = gettoken();
+            return NULL;  // 语句序列结束
+        default:
+            errors += 1; 报错; return NULL;
+
+3.9 表达式子程序 exp(int endsym) — 算符优先分析法
+
+双栈算法：运算符栈 op + 操作数栈 opn（元素为结点指针）
+
+exp(int endsym):
+    定义运算符栈 op（初始化，# 入栈）
+    定义操作数栈 opn
+    error = 0
+    while ((w != # || gettop(op) != #) && !error):
+        if (w 是标识符或常数等操作数):
+            根据 w 生成结点，进 opn;
+            w = gettoken();
+        else if (w 是运算符):
+            switch (precede[gettop(op)][w]):
+                case '<':
+                    push(op, w); w = gettoken(); break;
+                case '=':
+                    pop(op, t); w = gettoken(); break;  // 去括号
+                case '>':
+                    pop(opn, t2);
+                    pop(opn, t1);
+                    pop(op, t);
+                    生成运算符结点(以 t1, t2 为孩子) → 进 opn;
+                    break;
+                default:
+                    if (w == endsym) w = #;  // 替换结束标记
+                    else error = 1;
+        else if (w == endsym) w = #;  // 替换结束标记
+        else error = 1;
+
+    if (操作数栈只有一个结点 && gettop(op) == # && 无错误)
+        return 该结点指针;
+    else return NULL;
+
+四、运算符优先级表
+
+precede[行][列]：< = 优先，> = 后优先，= = 相等（去括号）
+
+行       +   -   *   /   (   )   =赋值  大小于  ==和!=  #
++       >   >   <   <   <   >   >      >      >      >
+-       >   >   <   <   <   >   >      >      >      >
+*       >   >   >   >   <   >   >      >      >      >
+/       >   >   >   >   <   >   >      >      >      >
+(       <   <   <   <   <   =   >      >      >      >
+)       >   >   >   >   >   >   >      >      >      >
+=赋值   <   <   <   <   <   <   <      <      <      >
+大小于  <   <   <   <   <   >   >      >      >      >
+==和!=  <   <   <   <   <   >   >      <      >      >
+#       <   <   <   <   <   <   <      <      <      =
+
+五、AST 结点定义要点
+
+- 物理结构：孩子表示法 或 孩子兄弟表示法
+- 结点类型：使用共用体 + 结构类型定义，通过标记区分结点类型
+- 每个结点包含：类型标记、属性值、孩子指针
+
+六、输出要求
+
+1. 语法树显示：先根遍历，清晰体现语法单位与AST的对应关系
+2. 格式化输出：通过遍历AST生成缩进编排的源程序文件

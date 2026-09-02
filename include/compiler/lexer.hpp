@@ -2,6 +2,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <iostream>
 #include <compiler/token.hpp>
 
@@ -12,9 +13,9 @@ public:
     void letex_analyzer();
 
     std::map<std::string, TokenType> keywords = {
-        {"if", TokenType::Keyword},
-        {"else", TokenType::Keyword},
-        {"while", TokenType::Keyword}
+        {"if", TokenType::If},
+        {"else", TokenType::Else},
+        {"while", TokenType::While}
     };
 
     // operator map

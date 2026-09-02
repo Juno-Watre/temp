@@ -1,14 +1,16 @@
 #include <string>
+#include <utility>
 #include <vector>
 #include <iostream>
 #include <map>
+
 #include <compiler/token.hpp>
 #include <compiler/lexer.hpp>
 
 
 
-Lexer::Lexer(std::string source) :sources(source) {
-    std::cout << "Lexering..." << std::endl;
+Lexer::Lexer(std::string source) :sources(std::move(source)) {
+    std::cout << "Lexering..." << '\n';
 };
 
 void Lexer::letex_analyzer() {
@@ -20,7 +22,7 @@ void Lexer::letex_analyzer() {
     while (pos < sources.length()) {
         char c = sources[pos];
 
-        if (isspace(c) ) {
+        if (isspace(c) != 0 ) {
             if (c == '\n') {
                 line_num += 1;roll_num = 1;
             }
@@ -74,4 +76,5 @@ void Lexer::letex_analyzer() {
             continue;
         }
     }
+    std::cout << "Lexer end" <<'\n';
 }

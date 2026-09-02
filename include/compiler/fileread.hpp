@@ -6,29 +6,28 @@
 #include <string>
 #include <vector>
 
-const std::string file_path = "C:\\Users\\m1590\\Desktop\\Project1\\sources\\";
+const std::string file_path = "/home/SuFin/desktop/D/Project1/sources/";
 
 namespace fs = std::filesystem;
 
 class FileRead {
 public:
     // 1. read file content from given path
-    static std::string get_file_content(std::string file_name) {
-        file_name = file_path + file_name;
-        std::ifstream in(file_name, std::ios::in | std::ios::binary);
-        if (!in.is_open()) {
-            std::cerr << "Error: Cannot open file " << file_name << std::endl;
+    static std::string get_file_content(const std::string& file_name) {
+        std::ifstream in_stream(file_name, std::ios::in | std::ios::binary);
+        if (!in_stream.is_open()) {
+            std::cerr << "Error: Cannot open file " << file_name << '\n';
             return "";
         }
 
         std::string content;
         std::string line;
         // read line by line, append to content
-        while (std::getline(in, line)) {
+        while (std::getline(in_stream, line)) {
             content += line + "\n";
         }
 
-        in.close();
+        in_stream.close();
         return content;
     }
 
@@ -46,7 +45,7 @@ public:
             }
         }
         catch (const fs::filesystem_error& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
+            std::cerr << "Error: " << e.what() << '\n';
         }
 
         return file_list;
