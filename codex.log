@@ -1,0 +1,6 @@
+[2026-09-02] Codex 工作记录
+问题：尝试通过 apply_patch 读写项目文件时，沙箱 bwrap 报错："Can\x27t find source path /home/SuFin/desktop/D/Project1: Permission denied"。
+原因：当前会话的默认文件系统沙箱未能正确挂载/访问该工作区路径；读取部分命令可执行，但 apply_patch 的沙箱辅助进程无法解析同一路径。
+影响：无法可靠地通过 apply_patch 写入 src/lexer.cpp 或 include/compiler/lexer.hpp；此前编译命令仍可运行。
+处理：尝试使用 require_escalated 提权访问；命令可启动，但部分编辑命令受 shell 转义或工具缺失影响，未完成源码写入。
+后续：恢复工作区挂载或权限后，再使用 apply_patch 完成词法分析器修复并重新编译验证。

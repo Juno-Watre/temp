@@ -1,0 +1,9 @@
+#include <stdio.h>
+// 注释 1
+/*
+*注释2
+*/
+int main(){
+    printf("Hello World");
+    return 0;
+}

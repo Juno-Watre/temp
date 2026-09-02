@@ -56,6 +56,7 @@ int main() {
 
         Lexer lexer(file_content);
         lexer.letex_analyzer();
+        lexer.display();
         
         AstGenerator ast_tree(lexer.tokens);
         Node* root = ast_tree.geneAstTree();

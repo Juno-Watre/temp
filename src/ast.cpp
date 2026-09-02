@@ -75,7 +75,9 @@ Node* AstGenerator::parseFactor() {
 
 // Public entry point
 Node* AstGenerator::geneAstTree() {
-    if (tokens.empty()) return nullptr;
+    if (tokens.empty()) { 
+        return nullptr;
+    }
     return parseExpression();
 }
 

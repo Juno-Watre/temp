@@ -12,5 +12,6 @@ const std::vector<std::map<std::string, std::string>> TYPE_NAME = {
 class ToolsClass {
 public:
     static void display(Node* root);
+    static std::string_view tokenTypeToString(TokenType type);
 };
 
