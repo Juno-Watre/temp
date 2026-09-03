@@ -1,18 +1,18 @@
-#include "compiler/ast.hpp"
 #include <compiler/tools.hpp>
 #include <queue>
 #include <string>
+#include <iostream>
 
 // waiting for test
-void ToolsClass::display(Node *root) {
-    std::queue<Node*> nodes;
+void ToolsClass::display(AstNode *root) {
+    std::queue<AstNode*> nodes;
     int nests = 0;
     while (true) {
         if (root->children.size() == 0) {
             nests --;
             break;
         }
-        for (Node* node:root ->children) {
+        for (AstNode* node:root ->children) {
             nodes.push(node);
             nests ++;
         }
@@ -49,12 +49,11 @@ std::string_view ToolsClass::tokenTypeToString(TokenType type) {
         case TokenType::Null:             return "Null";
 
         // 5.1 基本类型关键字
-        case TokenType::Void_:            return "Void_";
-        case TokenType::Int_:             return "Int_";
-        case TokenType::Float_:           return "Float_";
-        case TokenType::Double:           return "Double";
-        case TokenType::Char_:            return "Char_";
-        case TokenType::Bool:             return "Bool";
+        case TokenType::Void_Key:            return "Void_";
+        case TokenType::Int_Key:             return "Int_";
+        case TokenType::Float_Key:           return "Float_";
+        case TokenType::Double_Key:           return "Double";
+        case TokenType::Char_Key:            return "Char_";
         case TokenType::Long:             return "Long";
         case TokenType::Short:            return "Short";
         case TokenType::Unsigned:         return "Unsigned";

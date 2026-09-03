@@ -5,7 +5,7 @@ project(Project1 LANGUAGES CXX)
 add_executable(Project1
     src/main.cpp
     src/lexer.cpp
-    src/ast.cpp
+    src/ast_builder.cpp
     src/tools.cpp
 )
 

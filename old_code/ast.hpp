@@ -4,13 +4,13 @@
 #include <vector>
 
 
-struct Node
+struct AstNode
 {
-    Node* par;
-    std::vector<Node*> children;
+    AstNode* par;
+    std::vector<AstNode*> children;
     Token data;
 
-    Node& operator=(const Node& other);
+    AstNode& operator=(const AstNode& other);
 };
 
 
@@ -29,14 +29,14 @@ private:
     Token expect(TokenType type);
 
     // recursive descent: parse expression (addition/subtraction, lowest precedence)
-    Node* parseExpression();
+    AstNode* parseExpression();
 
 
     // recursive descent: parse term (multiplication/division, higher precedence)
-    Node* parseTerm();
+    AstNode* parseTerm();
 
     // recursive descent: parse factor (number, identifier, parentheses)
-    Node* parseFactor();
+    AstNode* parseFactor();
 
 public:
     // constructor
@@ -48,16 +48,17 @@ public:
     ~AstGenerator() = default;
 
     // public entry point
-    Node* geneAstTree();
+    AstNode* geneAstTree();
 
     // recursively destroy AST tree to free memory
-    static void destroyTree(Node* node) {
+    static void destroyTree(AstNode* node) {
         if (node == nullptr) { 
             return;
         }
-        for (Node* child : node->children) {
+        for (AstNode* child : node->children) {
             destroyTree(child);
         }
         delete node;
     }
 };
+

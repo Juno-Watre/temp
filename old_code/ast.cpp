@@ -24,10 +24,10 @@ Token AstGenerator::expect(TokenType type) {
 }
 
 // Recursive descent: parse expression (addition/subtraction, lowest precedence)
-Node* AstGenerator::parseExpression() {
-    Node* left = parseTerm();
+AstNode* AstGenerator::parseExpression() {
+    AstNode* left = parseTerm();
     while (current().lexeme == "-" || current().lexeme == "+") {
-        Node* opNode = new Node();
+        AstNode* opNode = new AstNode();
         opNode->data = consume();
         opNode->children.push_back(left);
         opNode->children.push_back(parseTerm());
@@ -37,10 +37,10 @@ Node* AstGenerator::parseExpression() {
 }
 
 // Recursive descent: parse term (multiplication/division, higher precedence)
-Node* AstGenerator::parseTerm() {
-    Node* left = parseFactor();
+AstNode* AstGenerator::parseTerm() {
+    AstNode* left = parseFactor();
     while (current().lexeme == "*" || current().lexeme == "/") {
-        Node* opNode = new Node();
+        AstNode* opNode = new AstNode();
         opNode->data = consume();
         opNode->children.push_back(left);
         opNode->children.push_back(parseFactor());
@@ -50,23 +50,23 @@ Node* AstGenerator::parseTerm() {
 }
 
 // Recursive descent: parse factor (number, identifier, parentheses)
-Node* AstGenerator::parseFactor() {
+AstNode* AstGenerator::parseFactor() {
     Token tok = current();
     if (tok.type == TokenType::Integer || tok.type == TokenType::Identifier) {
         consume();
-        Node* leaf = new Node();
+        AstNode* leaf = new AstNode();
         leaf->data = tok;
         return leaf;
     }
     if (tok.type == TokenType::ParenOpen ) {
         consume();
-        Node* expr = parseExpression();
+        AstNode* expr = parseExpression();
         expect(TokenType::ParenClose);  // TODO : check matching bracket
         return expr;
     }
     if (tok.type == TokenType::BraceOpen ) {
         consume();
-        Node* expr = parseExpression();
+        AstNode* expr = parseExpression();
         expect(TokenType::BraceOpen);  // TODO : check matching bracket
         return expr;
     }
@@ -74,7 +74,7 @@ Node* AstGenerator::parseFactor() {
 }
 
 // Public entry point
-Node* AstGenerator::geneAstTree() {
+AstNode* AstGenerator::geneAstTree() {
     if (tokens.empty()) { 
         return nullptr;
     }
@@ -82,12 +82,12 @@ Node* AstGenerator::geneAstTree() {
 }
 
 
-Node& Node::operator=(const Node& other) {
+AstNode& AstNode::operator=(const AstNode& other) {
     if (this == &other) {
         return *this;
     }
 
-    for (Node* child : children) {
+    for (AstNode* child : children) {
         delete child;
     }
     children.clear();
@@ -96,8 +96,8 @@ Node& Node::operator=(const Node& other) {
     data = other.data;
 
     // deep copy child nodes
-    for (Node* child : other.children) {
-        Node* newChild = new Node();
+    for (AstNode* child : other.children) {
+        AstNode* newChild = new AstNode();
         *newChild = *child; // recursive call to operator=
         children.push_back(newChild);
     }

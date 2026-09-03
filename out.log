@@ -1,34 +1,29 @@
 ========== Token List ==========
 Line    Col     Lexeme              Type
 ----------------------------------
-1       0       #                   Error_type
-1       1       include             Identifier
-1       9       <                   Error_type
-1       10      stdio               Identifier
-1       15      .                   DotSep
-1       16      h                   Identifier
-1       17      >                   Error_type
+1       1       #include            Include
+1       10      <                   Less
+1       11      stdio               Identifier
+1       16      .                   DotSep
+1       17      h                   Identifier
+1       18      >                   Greater
 2       1       // 注释 1         Comment
 3       1       /*
 *注释2
 */      Comment
-6       1       int                 Identifier
+6       1       int                 Int_
 6       5       main                Identifier
 6       9       (                   ParenOpen
 6       10      )                   ParenClose
 6       11      {                   BraceOpen
 7       5       printf              Identifier
 7       11      (                   ParenOpen
-7       12      "                   Error_type
-7       13      Hello               Identifier
-7       19      World               Identifier
-7       24      "                   Error_type
+7       12      "Hello World"       String
 7       25      )                   ParenClose
 7       26      ;                   Semicolon
-8       5       return              Identifier
+8       5       return              Return
 8       12      0                   Integer
 8       13      ;                   Semicolon
 9       1       }                   BraceClose
 10      1                           EndOfFile
 ==================================
-

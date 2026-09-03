@@ -33,12 +33,11 @@ enum class TokenType
     // 5. 关键字（Keyword）—— 语言保留字
     // ========================
     // --- 5.1 基本类型关键字 ---
-    Void_,             // void: 空类型，用于函数返回类型或空指针声明
-    Int_,              // int: 整型
-    Float_,            // float: 单精度浮点型（注意：与字面量Float区分，此为类型关键字）
-    Double,           // double: 双精度浮点型
-    Char_,             // char: 字符型（类型关键字，与字面量Char区分）
-    Bool,             // bool: 布尔型
+    Void_Key,             // void: 空类型，用于函数返回类型或空指针声明
+    Int_Key,              // int: 整型
+    Float_Key,            // float: 单精度浮点型（注意：与字面量Float区分，此为类型关键字）
+    Double_Key,           // double: 双精度浮点型
+    Char_Key,             // char: 字符型（类型关键字，与字面量Char区分）
     Long,             // long: 长整型
     Short,            // short: 短整型
     Unsigned,         // unsigned: 无符号修饰符

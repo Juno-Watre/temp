@@ -1,0 +1,11 @@
+#include <i>
+
+int main(){
+    int a = 0;
+    switch (a) {
+        case 1: break;
+        case 2: printf("hello world");
+        default: break;
+    }
+    return 0;
+}

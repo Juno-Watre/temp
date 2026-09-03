@@ -80,12 +80,14 @@ void Lexer::letex_analyzer() {
           }
 
           if (std::isalpha(uch) || ch == '_') {
-              const size_t start = pos, column = roll_num;
+              const size_t start = pos;
+              const size_t column = roll_num;
               while (pos < sources.length()) {
                   const auto current = static_cast<unsigned
                   char>(sources[pos]);
-                  if (!std::isalnum(current) && sources[pos] != '_')
-                  break;
+                  if (!std::isalnum(current) && sources[pos] != '_') {
+                    break;
+                }
                   ++pos;
                   ++roll_num;
               }
@@ -101,11 +103,12 @@ void Lexer::letex_analyzer() {
               continue;
           }
 
-          if (std::isdigit(uch)) {
-              const size_t start = pos, column = roll_num;
+          if (std::isdigit(uch) != 0) {
+              const size_t start = pos;
+              const size_t column = roll_num;
               while (pos < sources.length() &&
-                     std::isdigit(static_cast<unsigned
-                     char>(sources[pos]))) {
+                     (std::isdigit(static_cast<unsigned
+                     char>(sources[pos])) != 0)) {
                   ++pos;
                   ++roll_num;
               }
@@ -116,8 +119,9 @@ void Lexer::letex_analyzer() {
           }
 
           if (ch == '"' || ch == '\'') {
-              const size_t start = pos, start_line = line_num,
-              column = roll_num;
+              const size_t start = pos;
+              const size_t start_line = line_num;
+              const size_t column = roll_num;
               const char quote = ch;
               bool closed = false;
               ++pos;

@@ -1,3 +1,4 @@
+#include "compiler/ast-builder.hpp"
 #include <string>
 #include <iostream>
 
@@ -9,7 +10,6 @@
 
 #include <compiler/token.hpp>
 #include <compiler/fileread.hpp>
-#include <compiler/ast.hpp>
 #include <compiler/lexer.hpp>
 #include <compiler/tools.hpp>
 
@@ -58,9 +58,9 @@ int main() {
         lexer.letex_analyzer();
         lexer.display();
         
-        AstGenerator ast_tree(lexer.tokens);
-        Node* root = ast_tree.geneAstTree();
-        ToolsClass::display(root);
+        AstBuilder ast = AstBuilder();
+        ast.x_prase(lexer.tokens);
+        ast.displayFormal();
 
         // 4. 询问是否继续
         std::cout << "\n是否继续解析其他文件？(1: 退出 / 0: 继续): > ";

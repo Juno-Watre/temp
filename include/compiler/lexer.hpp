@@ -3,7 +3,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include <iostream>
 #include <compiler/token.hpp>
 
 
@@ -16,18 +15,18 @@ public:
         {"if", TokenType::If},
         {"else", TokenType::Else},
         {"while", TokenType::While},
-        {"int", TokenType::Int_},
+        {"int", TokenType::Int_Key},
         {"return", TokenType::Return},
-        {"float", TokenType::Float_},
-        {"double", TokenType::Double},
-        {"char", TokenType::Char_},
-        {"void", TokenType::Void_},
+        {"float", TokenType::Float_Key},
+        {"double", TokenType::Double_Key},
+        {"char", TokenType::Char_Key},
+        {"void", TokenType::Void_Key},
     };
 
     // operator map
     std::map<std::string, TokenType> operators = {
-        {"+", TokenType::Operator},
-        {"-", TokenType::Operator},
+        {"+", TokenType::Plus},
+        {"-", TokenType::Minus},
         {"==", TokenType::Operator},
         {"=", TokenType::Operator}
     };

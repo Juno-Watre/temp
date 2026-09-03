@@ -1,0 +1,105 @@
+#include <stdio.h>
+
+
+void fun() {
+    return;
+}
+
+
+int main(){
+    for (int i = 0;i < n;i ++){
+        for (int j = 0;j < n;j ++){
+            while (true) {
+                fun();
+            }
+        }
+    }
+
+    return 0;
+}
+
+/*  test4 输出
+(translation-unit
+  (preprocessor
+    (#include)
+    (<)
+    (stdio)
+    (.)
+    (h)
+    (>)
+  )
+  (function-definition
+    (void)
+    (fun)
+    (()
+    ())
+    (compound-statement
+      ({)
+      (return-statement
+        (return)
+        (expression
+          (;)
+        )
+      )
+      (})
+    )
+  )
+  (function-definition
+    (int)
+    (main)
+    (()
+    ())
+    (compound-statement
+      ({)
+      (expression
+        (for)
+        (()
+        (int)
+        (i)
+        (=)
+        (0)
+        (;)
+        (i)
+        (<)
+        (n)
+        (;)
+        (i)
+        (++)
+        ())
+        ({)
+        (for)
+        (()
+        (int)
+        (j)
+        (=)
+        (0)
+        (;)
+        (j)
+        (<)
+        (n)
+        (;)
+        (j)
+        (++)
+        ())
+        ({)
+        (while)
+        (()
+        (true)
+        ())
+        ({)
+        (fun)
+        (()
+        ())
+        (;)
+        (})
+        (})
+        (})
+        (return)
+        (0)
+        (;)
+      )
+      (})
+    )
+  )
+)
+*/
